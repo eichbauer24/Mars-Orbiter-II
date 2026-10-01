@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#16233B">
+<meta name="author" content="Manuela Jakober">
+<link rel="license" href="https://creativecommons.org/licenses/by/4.0/deed.de">
+<title>Mission Mars Orbiter II · Measurements and SI Units</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Chakra+Petch:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E8EDF3; --surface:#FFFFFF; --sunk:#F1F4F8; --ink:#16233B; --muted:#56667F; --line:#C8D2DF;
+  --amber:#C98A06; --amber-soft:#FFF3D6; --ok:#0F7A69; --ok-soft:#DDF3EE; --bad:#B8342A; --bad-soft:#FBE4E1;
+  --mars:#B4441F; --btn:#16233B; --btn-ink:#FFFFFF; --paper:#FBFAF5; --wood:#A97B4F; --ruler:#F5D76E;
+  --head:"Chakra Petch","Bahnschrift","Segoe UI",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible","Verdana","Segoe UI",system-ui,sans-serif;
+  --bottom:0px;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0D1524; --surface:#16213A; --sunk:#111B30; --ink:#E5EBF5; --muted:#97A6BF; --line:#2B3A58;
+    --amber:#F2B53A; --amber-soft:#3A2F12; --ok:#3CC4AC; --ok-soft:#123630; --bad:#F07A6E; --bad-soft:#3D1A18;
+    --mars:#E0673D; --btn:#E5EBF5; --btn-ink:#0D1524; --paper:#E9E6DA; --wood:#7A5636; --ruler:#D9B84A;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0D1524; --surface:#16213A; --sunk:#111B30; --ink:#E5EBF5; --muted:#97A6BF; --line:#2B3A58;
+  --amber:#F2B53A; --amber-soft:#3A2F12; --ok:#3CC4AC; --ok-soft:#123630; --bad:#F07A6E; --bad-soft:#3D1A18;
+  --mars:#E0673D; --btn:#E5EBF5; --btn-ink:#0D1524; --paper:#E9E6DA; --wood:#7A5636; --ruler:#D9B84A;
+}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 70px);-webkit-tap-highlight-color:transparent}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.55 var(--body);-webkit-text-size-adjust:100%;overflow-x:hidden}
+h1,h2,h3{font-family:var(--head);line-height:1.15;margin:0}
+h2{font-size:1.6rem;font-weight:700}
+h3{font-size:1.15rem;font-weight:600}
+p{margin:.4em 0 .8em}
+button,input,select,textarea{font:inherit;color:inherit}
+input,select,textarea{font-size:max(16px,1rem)}
+button{touch-action:manipulation}
+:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
+.wrap{max-width:980px;margin:0 auto;padding:0 16px}
+
+/* header */
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);border-bottom:1px solid var(--line)}
+.bar{display:flex;align-items:center;gap:10px;padding:8px 0}
+.brand{font-family:var(--head);font-weight:700;font-size:1.1rem;margin-right:auto;line-height:1.1;min-width:0}
+.brand small{display:block;font-family:var(--body);font-weight:400;font-size:.78rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.clock{font-family:var(--head);font-weight:600;font-size:1.2rem;font-variant-numeric:tabular-nums;padding:1px 8px;border:2px solid var(--ink);border-radius:6px}
+.clock.low{border-color:var(--bad);color:var(--bad)}
+.tokens{display:flex;align-items:center;gap:3px;font-size:.8rem;color:var(--muted)}
+.tok{width:11px;height:11px;border-radius:50%;background:var(--amber);display:inline-block}
+.tok.used{background:transparent;border:2px solid var(--line)}
+.tb{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:6px 12px;cursor:pointer;font-weight:700;font-size:.9rem;min-height:40px}
+.tb:hover{border-color:var(--ink)}
+.desk-only{display:inline-flex}
+
+/* progress: thin trajectory inside sticky header */
+.traj{position:relative;display:grid;grid-template-columns:26px repeat(8,1fr) 26px;align-items:center;height:30px;margin-bottom:4px}
+.traj::before{content:"";position:absolute;left:13px;right:13px;top:calc(50% - 1px);border-top:2px dashed var(--line)}
+.planet{width:20px;height:20px;border-radius:50%;justify-self:center;position:relative}
+.earth{background:radial-gradient(circle at 35% 35%,#6FB3E8,#1E5C9E 70%)}
+.mars{background:radial-gradient(circle at 35% 35%,#E98A5D,var(--mars) 70%)}
+.node{justify-self:center;position:relative;width:24px;height:24px;display:grid;place-items:center}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--bg);border:2px solid var(--line)}
+.node.done .dot{background:var(--ok);border-color:var(--ok)}
+.node.here .dot{width:24px;height:24px;border:none;background:var(--ink);clip-path:polygon(100% 50%,40% 15%,15% 0,25% 35%,0 50%,25% 65%,15% 100%,40% 85%)}
+
+/* stage tabs */
+nav.stages{display:flex;gap:6px;overflow-x:auto;padding:14px 0 4px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+nav.stages::-webkit-scrollbar{display:none}
+nav.stages button{flex:0 0 auto;border:1px solid var(--line);background:var(--surface);padding:8px 14px;border-radius:99px;cursor:pointer;font-family:var(--head);font-weight:600;font-size:.95rem;color:var(--muted);min-height:40px}
+nav.stages button.on{color:var(--btn-ink);background:var(--btn);border-color:var(--btn)}
+nav.stages button:disabled{opacity:.45;cursor:not-allowed}
+
+main{padding:10px 0 calc(60px + var(--bottom))}
+.lede{color:var(--muted);max-width:68ch}
+
+/* lock panels */
+.lock{background:var(--surface);border:1px solid var(--line);border-radius:12px;margin:16px 0;overflow:hidden}
+.lock>.lh{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line);background:var(--sunk)}
+.lock>.lh h3{margin-right:auto}
+.lock>.lb{padding:16px}
+.badge{font-size:.78rem;font-weight:700;padding:3px 9px;border-radius:99px;background:var(--line);color:var(--ink);white-space:nowrap}
+.badge.ok{background:var(--ok);color:#fff}
+.wordcard{display:flex;align-items:center;gap:14px}
+.word{font-family:var(--head);font-weight:700;font-size:1.6rem;letter-spacing:.12em;color:var(--ok)}
+@media (prefers-reduced-motion:no-preference){
+  .reveal{animation:flip .7s cubic-bezier(.2,.8,.3,1.2)}
+  .shake{animation:shake .45s}
+}
+@keyframes flip{0%{transform:perspective(600px) rotateX(90deg);opacity:0}100%{transform:none;opacity:1}}
+@keyframes shake{0%,100%{transform:none}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+
+.q{padding:12px 0;border-bottom:1px solid var(--line)}
+.q:last-of-type{border-bottom:none}
+.q>span{display:block;margin-bottom:8px}
+.opts{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.opts button{border:2px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 6px;cursor:pointer;min-height:48px;font-size:.92rem;line-height:1.2}
+.opts button b{display:block;font-family:var(--head);font-size:1.1rem}
+.opts button.on{border-color:var(--ink);background:var(--ink);color:var(--surface)}
+.chips{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.chip{border:2px solid var(--line);background:var(--surface);border-radius:10px;padding:10px 12px;cursor:pointer;text-align:left;min-height:48px}
+.chip.on{border-color:var(--ink);background:var(--amber-soft);font-weight:700}
+.chip.on::after{content:" ✓"}
+.chip:disabled{opacity:.35;cursor:default}
+.slots{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:14px 0 6px;max-width:340px}
+.slot{aspect-ratio:1;border:2px dashed var(--line);border-radius:10px;display:grid;place-items:center;font-family:var(--head);font-weight:700;font-size:1.4rem;background:none;cursor:pointer;padding:0}
+.slot.f{border-style:solid;border-color:var(--ink);background:var(--sunk)}
+.slot:disabled{cursor:default}
+
+.codeline{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+.code{font-family:var(--head);font-weight:700;font-size:1.4rem;letter-spacing:.22em;padding:4px 12px;background:var(--sunk);border-radius:6px;min-width:110px}
+.btn{border:none;background:var(--btn);color:var(--btn-ink);border-radius:10px;padding:10px 16px;font-weight:700;cursor:pointer;min-height:46px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.small{padding:6px 12px;font-size:.9rem;min-height:40px}
+.btn.wide{flex:1 1 auto}
+.fb{margin-top:12px;padding:10px 14px;border-radius:8px;font-weight:700}
+.fb.bad{background:var(--bad-soft);color:var(--bad)}
+.fb.ok{background:var(--ok-soft);color:var(--ok)}
+.fb.info{background:var(--amber-soft);color:var(--ink);font-weight:400}
+.hint{margin-top:12px;padding:10px 14px;border-left:4px solid var(--amber);background:var(--amber-soft);border-radius:0 8px 8px 0}
+.muted{color:var(--muted)}
+.inp{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:9px 10px;width:100%;min-height:44px}
+.inp.n{width:100px;text-align:right;font-variant-numeric:tabular-nums}
+.inp.ok{border-color:var(--ok);background:var(--ok-soft)}
+.inp.bad{border-color:var(--bad);background:var(--bad-soft)}
+textarea.inp{min-height:84px;resize:vertical}
+label.f{display:block;font-weight:700;font-size:.9rem;margin:12px 0 4px}
+.fields{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.fields>div{flex:0 0 auto}
+
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+th{font-size:.85rem;color:var(--muted);font-weight:700}
+
+/* lock 5 team cards */
+.teams{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.team{border:1px solid var(--line);border-radius:10px;padding:12px;background:var(--sunk)}
+.team h4{margin:0 0 6px;font-family:var(--head);font-size:1.05rem}
+.trials{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.trials span{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:2px 8px;font-variant-numeric:tabular-nums;font-size:.95rem}
+.team .fields .inp.n{width:90px}
+.dig{display:grid;grid-template-columns:1fr 64px;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.dig .inp{text-align:center;font-family:var(--head);font-size:1.3rem;font-weight:700}
+
+/* story */
+.story{background:#16233B;color:#fff;border-radius:14px;padding:24px 22px;margin:6px 0 20px;position:relative;overflow:hidden}
+.story .tx{font-family:var(--head);font-size:.85rem;opacity:.75;letter-spacing:.04em}
+.story h1{font-size:clamp(2rem,8vw,3.2rem);margin:.15em 0 .3em;position:relative}
+.story p{max-width:60ch;position:relative}
+.story .orb{position:absolute;right:-60px;top:-60px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#E98A5D,#8E3214 70%);opacity:.85}
+.roles{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:10px 0}
+.role{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--surface)}
+.role b{font-family:var(--head)}
+
+/* stations */
+.stgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:16px 0}
+.stbtn{border:2px solid var(--line);background:var(--surface);border-radius:12px;padding:10px 12px;cursor:pointer;text-align:left;min-height:96px}
+.stbtn.on{border-color:var(--ink);box-shadow:inset 0 -4px 0 var(--amber)}
+.stbtn .L{font-family:var(--head);font-weight:700;font-size:1.9rem;line-height:1;display:block;margin-top:6px}
+.stbtn .L.empty{color:var(--line)}
+.warn{border:2px solid var(--bad);color:var(--bad);border-radius:8px;padding:8px 12px;font-weight:700;margin:10px 0}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:6px 0}
+.seg button{border:none;background:var(--surface);padding:8px 14px;cursor:pointer;border-right:1px solid var(--line);min-height:44px}
+.seg button:last-child{border-right:none}
+.seg button.on{background:var(--ink);color:var(--surface);font-weight:700}
+
+/* instruments */
+.lab{background:var(--sunk);border:1px solid var(--line);border-radius:12px;padding:14px;margin:12px 0}
+.lab h4{font-family:var(--head);margin:0 0 8px;font-size:1rem}
+.inst{display:flex;gap:12px;justify-content:center;align-items:flex-start;flex-wrap:wrap}
+.inst svg{display:block;max-width:100%;height:auto;background:var(--surface);border-radius:10px;border:1px solid var(--line);touch-action:manipulation}
+.cap{font-size:.8rem;color:var(--muted);text-align:center;margin-top:4px}
+.ctrls{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;align-items:center}
+.range{width:100%;accent-color:var(--amber);height:32px}
+.sw{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px}
+.swd{font-family:var(--head);font-weight:700;font-size:2rem;font-variant-numeric:tabular-nums;min-width:120px;padding:2px 12px;background:#0E1A2B;color:#7CF2C9;border-radius:8px;text-align:right}
+.swbtn{width:96px;height:96px;border-radius:50%;border:none;font-family:var(--head);font-weight:700;font-size:1.1rem;cursor:pointer;background:var(--ok);color:#fff;user-select:none;-webkit-user-select:none}
+.swbtn.run{background:var(--bad)}
+.lcd{font-family:var(--head);font-weight:700;font-size:2.2rem;font-variant-numeric:tabular-nums;background:#0E1A2B;color:#7CF2C9;border-radius:8px;padding:4px 16px;text-align:right;min-width:180px}
+.svg-ink{fill:var(--ink)} .svg-muted{fill:var(--muted)} .svg-line{stroke:var(--ink)} .svg-dash{stroke:var(--line)}
+.svg-paper{fill:var(--paper);stroke:var(--muted)} .svg-wood{fill:var(--wood)} .svg-ruler{fill:var(--ruler);stroke:var(--ink)}
+.svg-bob{fill:var(--mars)} .svg-ok{stroke:var(--ok)} .svg-bad{stroke:var(--bad)}
+
+.decoder td:first-child{width:62%}
+.finalword{display:flex;gap:8px;margin:12px 0}
+.finalword span{width:54px;height:62px;border:2px solid var(--ink);border-radius:10px;display:grid;place-items:center;font-family:var(--head);font-weight:700;font-size:2rem}
+
+/* overlays */
+.scrim{position:fixed;inset:0;background:rgba(10,16,30,.55);z-index:40;display:flex;align-items:center;justify-content:center;padding:18px}
+.modal{background:var(--surface);border-radius:14px;max-width:560px;width:100%;padding:22px;max-height:88vh;overflow:auto}
+.die{width:62px;height:62px;border:3px solid var(--ink);border-radius:12px;display:grid;place-items:center;font-family:var(--head);font-weight:700;font-size:2rem;margin-bottom:10px}
+@media (prefers-reduced-motion:no-preference){.die.roll{animation:roll .7s ease-out}}
+@keyframes roll{0%{transform:rotate(-360deg) scale(.5)}100%{transform:none}}
+.opt{display:block;width:100%;text-align:left;border:1px solid var(--line);background:var(--sunk);border-radius:10px;padding:12px;margin:8px 0;cursor:pointer;min-height:48px}
+.opt:hover{border-color:var(--ink)}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(560px,100%);background:var(--surface);z-index:45;border-left:1px solid var(--line);display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.drawer .dh{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line)}
+.drawer .dh h2{font-size:1.25rem;margin-right:auto}
+.drawer .db{overflow:auto;padding:6px 16px 30px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+.file{border-top:2px solid var(--ink);padding-top:10px;margin-top:22px}
+.file h3{margin-bottom:6px}
+.formula{font-family:var(--head);font-weight:600;background:var(--amber-soft);padding:8px 12px;border-radius:6px;display:inline-block}
+.filetabs{display:flex;gap:6px;overflow-x:auto;padding:10px 0;position:sticky;top:0;background:var(--surface);z-index:1}
+.filetabs a{flex:0 0 auto;border:1px solid var(--line);border-radius:99px;padding:6px 12px;color:var(--ink);text-decoration:none;font-size:.88rem}
+
+/* bottom bar (phones) */
+.bottombar{display:none}
+
+.cert{border:3px double var(--ink);border-radius:12px;padding:24px;text-align:center;background:var(--surface);margin:16px 0}
+.cert h2{font-size:2rem}
+.cert .big{font-family:var(--head);font-weight:700;font-size:1.4rem;letter-spacing:.06em;color:var(--ok);margin:10px 0}
+.fds{border-bottom:1px solid var(--line);padding:12px 0}
+.fds:last-child{border-bottom:none}
+.fds .fields .inp{width:auto}
+footer{padding:20px 0 40px;color:var(--muted);font-size:.85rem}
+footer button{background:none;border:none;color:var(--muted);text-decoration:underline;cursor:pointer;padding:0}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + var(--bottom) + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--surface);padding:10px 18px;border-radius:99px;font-weight:700;z-index:50;pointer-events:none}
+
+@media (max-width:760px){
+  :root{--bottom:64px}
+  body{font-size:16px}
+  h2{font-size:1.4rem}
+  .desk-only{display:none}
+  .stgrid{grid-template-columns:repeat(2,1fr)}
+  .teams{grid-template-columns:1fr}
+  .lock>.lb{padding:14px 12px}
+  .lock>.lh{padding:10px 12px}
+  .story{padding:20px 16px}
+  .story .orb{width:140px;height:140px;right:-50px;top:-50px}
+  .bottombar{display:grid;grid-template-columns:repeat(3,1fr);position:fixed;left:0;right:0;bottom:0;z-index:46;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+  .bottombar button{border:none;background:none;height:64px;font-family:var(--head);font-weight:600;font-size:.9rem;color:var(--muted);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer}
+  .bottombar button.on{color:var(--ink)}
+  .bottombar button svg{width:22px;height:22px}
+  .scrim.sheet{align-items:flex-end;padding:0;z-index:50}
+  .scrim.sheet .modal{border-radius:16px 16px 0 0;padding-bottom:calc(22px + env(safe-area-inset-bottom,0px))}
+  .drawer{bottom:calc(var(--bottom) + env(safe-area-inset-bottom,0px));padding-bottom:0;border-left:none}
+  .lcd{font-size:1.9rem;min-width:150px}
+  .opts button{font-size:.85rem}
+}
+@media print{
+  header,nav,footer,.noprint,.drawer,.scrim,.bottombar{display:none!important}
+  body{background:#fff;color:#000}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="bar">
+      <div class="brand">Mars Orbiter II<small id="teamline">Measurements and SI Units</small></div>
+      <span class="tokens" id="tokens" title="Hint tokens"></span>
+      <span class="clock" id="clock" title="Mission countdown">100:00</span>
+      <button class="tb desk-only" data-a="drawer" data-v="handbook">Handbook</button>
+      <button class="tb desk-only" data-a="drawer" data-v="log">Logbook</button>
+    </div>
+    <div class="traj" id="traj" aria-label="Mission progress"></div>
+  </div>
+</header>
+<div class="wrap"><nav class="stages" id="nav"></nav></div>
+<main class="wrap" id="main"></main>
+<footer class="wrap"><p style="margin:0 0 6px">„Mission Mars Orbiter II – Escape Room: Measurements and SI Units“ von <b>Manuela Jakober</b>, lizenziert unter <a href="https://creativecommons.org/licenses/by/4.0/deed.de" rel="license" target="_blank" style="color:inherit">CC BY 4.0</a>. Bearbeitung und Weitergabe erlaubt, bei Nennung der Urheberin und der Lizenz.</p>Progress is saved on this device. <button data-a="reset">Reset mission</button></footer>
+<nav class="bottombar" id="bottombar" aria-label="Main">
+  <button data-a="close" id="bb-m"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2c3 2 5 6 5 10l-2 5H9l-2-5c0-4 2-8 5-10z"/><circle cx="12" cy="10" r="2"/><path d="M9 17l-2 4M15 17l2 4"/></svg>Mission</button>
+  <button data-a="drawer" data-v="handbook" id="bb-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h7a3 3 0 013 3v13a2 2 0 00-2-2H4zM20 4h-5a3 3 0 00-1 .2V20a2 2 0 012-2h4z"/></svg>Handbook</button>
+  <button data-a="drawer" data-v="log" id="bb-l"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3h11l3 3v15H5z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg>Logbook</button>
+</nav>
+<div id="overlay"></div>
+<div id="toastbox"></div>
+
+<script>
+(function(){
+const KEY='mmo2-v2';
+const MISSION_MIN=100;
+function nst(){return{mode:'virtual',est:'',t:['','',''],mean:'',dx:'',raw:'',letter:null,res:'',msg:''}}
+const def=()=>({view:'intro',team:'',names:'',start:null,tokens:3,hints:{},solved:{},fb:{},
+  l1:{},l2:[],l3:[],l4:{},pw:'',l5:{a:'',b:'',c:'',d:''},l5calc:{},l5checked:false,
+  st:1,sensor:{1:nst(),2:nst(),3:nst(),4:nst()},
+  ruler:{n:100,t:0.0101,view:'top'},scale:{cup:true,tare:0,grains:0,count:0},
+  final:{},b1:'',b2:'',b3:'',exit:{},exitShow:false,log:{},rep:null,drawer:null});
+let S=load();
+function load(){try{const r=localStorage.getItem(KEY);if(r){const o=JSON.parse(r);const d=def();for(const k in d){if(o[k]!==undefined)d[k]=o[k];}return d;}}catch(e){}return def();}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const num=s=>{const v=parseFloat(String(s).replace(',','.').trim());return isNaN(v)?null:v};
+const fmt=(v,d)=>(Math.round(v*Math.pow(10,d))/Math.pow(10,d)).toFixed(d);
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const buzz=p=>{try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}};
+let anim={};   // one-shot animation flags
+function toast(m){const b=document.getElementById('toastbox');b.innerHTML=`<div class="toast">${esc(m)}</div>`;clearTimeout(toast.t);toast.t=setTimeout(()=>b.innerHTML='',1800);}
+
+/* ---------- content ---------- */
+const WORDS={l1:'ALWAYS',l2:'CHECK',l3:'YOUR',l4:'UNITS'};
+const CODES={l1:'13212',l2:'13578',l3:'52134',l4:'MARS',pw:'ALWAYS CHECK YOUR UNITS',l5:'2312',lab:'SAFE',b1:'30'};
+const HINTS={
+ l1:'Could you measure it with a ruler, a scale, a clock or a thermometer? Does the number have a unit?',
+ l2:'Look at the table in File 2 again. Which unit is the base unit for mass? Are the symbols written exactly as in the table?',
+ l3:'Convert everything into the same unit first. Which unit would be easiest?',
+ l4:'Imagine it: could you carry 150 kg of apples in your bag?',
+ pw:'The four words form a sentence that you already know from the Mars Orbiter story.',
+ l5:'Mean = sum ÷ 3. Compare each team\u2019s mean with the true value. What does a small Δx tell you?',
+ lab1:'One sheet is too thin and one swing is too fast. How could you measure many at once and then divide?',
+ lab2:'What could be wrong with your instrument? How could you check it?',
+ lab3:'Your four letters, in station order, form an English word. If they do not, one measurement is wrong.'
+};
+const ROLES=['Commander','Engineer','Analyst','Communicator'];
+const REP={
+ l1:{q:'Why is (c) category 2 but (b) category 3?',ok:'You could measure (c) with a clock, only the unit is missing. Excitement cannot be measured with any instrument.',
+     no:['(c) contains a number and (b) does not, that is all that matters.','(b) is a feeling, so it is measurable with a scale from 1 to 10.']},
+ l2:{q:'Why is \u201c3 g\u201d rejected but \u201c0.5 kg\u201d accepted?',ok:'The SI base unit of mass is the kilogram, not the gram.',
+     no:['3 g is too small for the navigation computer.','\u201cg\u201d is not an official unit symbol.']},
+ l3:{q:'How did you compare 0.0001 km with the others?',ok:'Convert it: 0.0001 km = 0.1 m = 100 mm, so it is the longest.',
+     no:['0.0001 is the smallest number, so it is the shortest length.','Kilometres are always longer than millimetres, whatever the number.']},
+ l4:{q:'Why can\u2019t a hair be 70 mm thick?',ok:'70 mm = 7 cm, that is thicker than a finger.',
+     no:['Millimetres are not an SI unit.','A hair is so thin that it has no thickness.']},
+ pw:{q:'What would have saved the Mars Orbiter?',ok:'Both teams using the same units and always checking them.',
+     no:['A faster rocket with more fuel.','Launching the probe one year later.']},
+ l5:{q:'What does Δx = 2.0 cm tell you about Team 2?',ok:'Their values scatter a lot: they are not precise (random error).',
+     no:['Their mean is 2.0 cm away from the true value.','They have a systematic error of 2.0 cm.']},
+ lab:{q:'Why did you measure 100 sheets instead of one?',ok:'The reading error of the ruler is shared by 100 sheets, so it becomes 100 times smaller per sheet.',
+     no:['Because the ruler was faulty.','Because one sheet would weigh too little.']}
+};
+const ST={
+ 1:{title:'Length',q:'Thickness of one sheet',unit:'µm',warn:true,tol:1,
+    task:'A single sheet of paper is far too thin to measure with your ruler. Find its thickness in µm anyway. Do three independent trials.',
+    eq:'ruler, paper',dec:[[80,'T','less than 80 µm'],[120,'S','80 µm to 120 µm'],[null,'R','more than 120 µm']]},
+ 2:{title:'Time',q:'Period T of the pendulum',unit:'s',warn:false,tol:.01,
+    task:'The pendulum is l = 1.00 m long. A single swing is too fast to time reliably. Find the period T, the time for one full swing (there and back). Do three independent trials.',
+    eq:'pendulum, stopwatch',dec:[[1.9,'B','less than 1.9 s'],[2.1,'A','1.9 s to 2.1 s'],[null,'C','more than 2.1 s']]},
+ 3:{title:'Mass',q:'Mass of one rice grain',unit:'mg',warn:true,tol:.5,
+    task:'Find the mass of one rice grain in mg. Do three independent trials.',
+    eq:'scale, rice, cup',dec:[[15,'G','less than 15 mg'],[35,'F','15 mg to 35 mg'],[null,'H','more than 35 mg']]},
+ 4:{title:'Speed',q:'Walking speed',unit:'m/s',warn:false,tol:.01,
+    task:'A classmate walks at normal pace over the marked 5 m. Find the speed in m/s. Do three independent trials (same walker, normal pace).',
+    eq:'marked track, stopwatch',dec:[[1.0,'D','less than 1.0 m/s'],[1.8,'E','1.0 m/s to 1.8 m/s'],[null,'N','more than 1.8 m/s']]}
+};
+function decode(n,m){const d=ST[n].dec;if(m<d[0][0])return d[0][1];if(m<=d[1][0])return d[1][1];return d[2][1];}
+
+/* ---------- progress ---------- */
+const s1count=()=>['l1','l2','l3','l4'].filter(k=>S.solved[k]).length;
+const unlocked=v=>({intro:true,stage1:!!S.start,stage2:!!S.solved.pw,stage3:!!S.solved.l5,vault:!!S.solved.lab,bonus:!!S.solved.lab}[v]);
+const progressIndex=()=>s1count()+(S.solved.pw?1:0)+(S.solved.l5?1:0)+(S.solved.lab?1:0);
+function renderTraj(){
+  const labels=['Start','Stage 1: 1 lock','2 locks','3 locks','4 locks','Stage 2','Stage 3','Vault'];
+  const p=progressIndex();
+  let h='<span class="planet earth" title="Earth"></span>';
+  labels.forEach((l,i)=>{h+=`<span class="node ${i<p?'done':''} ${i===p?'here':''}" title="${l}"><span class="dot"></span></span>`;});
+  document.getElementById('traj').innerHTML=h+'<span class="planet mars" title="Mars"></span>';
+  let t='';for(let i=0;i<3;i++)t+=`<span class="tok ${i<S.tokens?'':'used'}"></span>`;
+  document.getElementById('tokens').innerHTML=t;
+  document.getElementById('teamline').textContent=S.team?('Team '+S.team):'Measurements and SI Units';
+}
+function renderNav(){
+  const tabs=[['intro','Briefing'],['stage1','Stage 1'],['stage2','Stage 2'],['stage3','Stage 3'],['vault','Vault'],['bonus','Bonus']];
+  document.getElementById('nav').innerHTML=tabs.map(([v,l])=>`<button data-a="go" data-v="${v}" class="${S.view===v?'on':''}" ${unlocked(v)?'':'disabled'}>${unlocked(v)?'':'🔒 '}${l}</button>`).join('');
+  const on=S.drawer||'m';['m','handbook','log'].forEach((k,i)=>{const el=document.getElementById(['bb-m','bb-h','bb-l'][i]);el.classList.toggle('on',on===k);});
+}
+
+/* ---------- views ---------- */
+function vIntro(){
+  return `<section class="story">
+    <span class="orb" aria-hidden="true"></span>
+    <div class="tx">Incoming transmission from Mission Control</div>
+    <h1>Mars Orbiter II</h1>
+    <p>Mars Orbiter II is 12 hours from orbit insertion, but its navigation computer is corrupted: all units are scrambled and its four sensors must be recalibrated by hand. You are the only engineers on duty.</p>
+    <p>Remember: in 1999, NASA lost a Mars probe worth about 125 million dollars because one team used pound-force seconds and another expected newton seconds. Don\u2019t let it happen again.</p>
+  </section>
+  <div class="lock"><div class="lh"><h3>${S.start?'Mission running':'Start the mission'}</h3></div><div class="lb">
+    <label class="f" for="team">Team number or name</label>
+    <input class="inp" id="team" data-bind="team" value="${esc(S.team)}" placeholder="e.g. 3" style="max-width:240px" autocomplete="off">
+    <label class="f" for="names">Engineers (names)</label>
+    <input class="inp" id="names" data-bind="names" value="${esc(S.names)}" placeholder="Anna, Ben, Chiara, David" autocomplete="off">
+    <p class="muted" style="margin-top:14px">Read the whole Handbook first. Note new words and one open question in your Logbook.</p>
+    <div class="codeline">${S.start?`<button class="btn wide" data-a="go" data-v="stage1">Continue the mission</button>`:`<button class="btn wide" data-a="start">Start countdown</button><button class="btn ghost wide" data-a="drawer" data-v="handbook">Read the Handbook</button>`}</div>
+  </div></div>
+  <h2>Your team</h2>
+  <div class="roles">
+    <div class="role"><b>1 Commander</b><br><span class="muted">Watches the clock and the progress, keeps the team on track.</span></div>
+    <div class="role"><b>2 Engineer</b><br><span class="muted">Handles the instruments in the Sensor Lab and checks them.</span></div>
+    <div class="role"><b>3 Analyst</b><br><span class="muted">Does the calculations and checks all units.</span></div>
+    <div class="role"><b>4 Communicator</b><br><span class="muted">Sends the codes and looks after the hint tokens.</span></div>
+  </div>
+  <p class="lede">Everybody reads everything and keeps the Logbook. After each correct code, a die decides who has to explain a step.</p>
+  <div class="lock"><div class="lh"><h3>Mission plan</h3></div><div class="lb">
+    <p><b>Stage 1 · Data Decoding.</b> Solve four locks in any order. Each lock gives one word of the password.</p>
+    <p><b>Stage 2 · Data Forensics.</b> Analyse measurement data from other teams and find the error.</p>
+    <p><b>Stage 3 · Sensor Lab.</b> Calibrate four sensors. Their four letters open the Vault.</p>
+    <p class="muted">You have 3 hint tokens. A wrong code gives \u201cAccess denied\u201d, but nobody tells you which digit is wrong.</p>
+  </div></div>`;
+}
+
+function hintBtn(id){return S.hints[id]?'':`<button class="btn ghost small" data-a="hint" data-v="${id}" ${S.tokens<1?'disabled':''}>Use a hint token</button>`;}
+function fb(id){const f=S.fb[id];if(!f)return'';return `<div class="fb ${f.t}">${f.m}</div>`;}
+function lockShell(id,title,body,codeStr,ready){
+  if(S.solved[id]&&WORDS[id]) return `<div class="lock" id="lk-${id}"><div class="lh"><h3>${title}</h3><span class="badge ok">Solved</span></div><div class="lb"><div class="wordcard ${anim.reveal===id?'reveal':''}"><span class="muted">Password fragment</span><span class="word">${WORDS[id]}</span></div></div></div>`;
+  return `<div class="lock ${anim.shake===id?'shake':''}" id="lk-${id}"><div class="lh"><h3>${title}</h3><span class="badge">Locked</span></div><div class="lb">
+    ${body}
+    <div class="codeline"><span class="code" aria-label="Your code">${esc(codeStr)}</span>
+      <button class="btn" data-a="send" data-v="${id}" ${ready?'':'disabled'}>Send code</button>${hintBtn(id)}</div>
+    ${fb(id)}${S.hints[id]?`<div class="hint">${HINTS[id]}</div>`:''}
+  </div></div>`;
+}
+
+function vStage1(){
+  const l1s=[['a','The corridor is 45 m long.'],['b','The film was really exciting.'],['c','The bus arrives in 20.'],['d','Anna\u2019s backpack has a mass of 6 kg.'],['e','The classroom is 6 wide.']];
+  const cats=[[1,'quantity with unit'],[2,'unit missing'],[3,'not a quantity']];
+  const b1=`<p>Sort each statement into a category.</p>`+
+    l1s.map(([k,t])=>`<div class="q"><span>(${k}) ${t}</span><div class="opts">${cats.map(([v,l])=>`<button data-a="l1" data-k="${k}" data-v="${v}" class="${S.l1[k]==v?'on':''}" aria-pressed="${S.l1[k]==v}"><b>${v}</b>${l}</button>`).join('')}</div></div>`).join('');
+  const c1=l1s.map(([k])=>S.l1[k]||'_').join('');
+  const l2s=['length = 12 m','mass = 3 g','time = 5 s','time = 5 sec','temperature = 300 K','length = 40 cm','electric current = 2 A','mass = 0.5 kg'];
+  const b2=`<p>The navigation computer only accepts entries in <b>SI base units</b> with the correct symbol. Tap every entry it will accept.</p><div class="chips">`+
+    l2s.map((t,i)=>`<button class="chip ${S.l2.includes(i+1)?'on':''}" data-a="l2" data-v="${i+1}" aria-pressed="${S.l2.includes(i+1)}">${i+1}) ${t}</button>`).join('')+'</div>';
+  const c2=S.l2.slice().sort().join('')||'_';
+  const l3s=['3 cm','0.02 m','40 mm','0.0001 km','5000 µm'];
+  const b3=`<p>Tap the lengths from <b>shortest to longest</b>. Tap a filled box to take a card back.</p><div class="chips">`+
+    l3s.map((t,i)=>`<button class="chip" data-a="l3" data-v="${i+1}" ${S.l3.includes(i+1)?'disabled':''}>${i+1}) ${t}</button>`).join('')+
+    `</div><div class="slots">${[0,1,2,3,4].map(i=>`<button class="slot ${S.l3[i]?'f':''}" data-a="l3rm" data-v="${i}" ${S.l3[i]?'':'disabled'} aria-label="Position ${i+1}">${S.l3[i]||''}</button>`).join('')}</div><span class="muted" style="font-size:.85rem">shortest → longest</span>`;
+  const l4s=[['Height of a classroom door',[['M','2 m'],['K','2 mm'],['P','2 km']]],['Mass of an apple',[['A','150 g'],['O','150 kg'],['D','150 mg']]],['Thickness of a human hair',[['R','70 µm'],['T','70 mm'],['L','70 km']]],['Car trip from Salzburg to Vienna',[['S','300 km'],['E','300 m'],['C','300 mm']]]];
+  const b4=`<p>Only one value in each line makes sense. Choose it.</p>`+
+    l4s.map(([t,o],i)=>`<div class="q"><span>${i+1}) ${t}</span><div class="opts">${o.map(([L,v])=>`<button data-a="l4" data-k="${i}" data-v="${L}" class="${S.l4[i]===L?'on':''}"><b>${L}</b>${v}</button>`).join('')}</div></div>`).join('');
+  const c4=[0,1,2,3].map(i=>S.l4[i]||'_').join('');
+  let pw='';
+  if(s1count()===4){
+    pw=S.solved.pw?`<div class="lock" id="lk-pw"><div class="lh"><h3>Password</h3><span class="badge ok">Accepted</span></div><div class="lb"><div class="word ${anim.reveal==='pw'?'reveal':''}" style="font-size:1.25rem">ALWAYS CHECK YOUR UNITS</div><div class="codeline"><button class="btn wide" data-a="go" data-v="stage2">Open Stage 2</button></div></div></div>`:
+    `<div class="lock ${anim.shake==='pw'?'shake':''}" id="lk-pw"><div class="lh"><h3>Password</h3><span class="badge">Locked</span></div><div class="lb">
+      <p>You have all four fragments: <b>${['l1','l2','l3','l4'].map(k=>WORDS[k]).join(' · ')}</b>. Put them in the right order.</p>
+      <input class="inp" data-bind="pw" value="${esc(S.pw)}" placeholder="Type the password" autocomplete="off" autocapitalize="characters" enterkeyhint="send">
+      <div class="codeline"><button class="btn" data-a="send" data-v="pw">Send password</button>${hintBtn('pw')}</div>
+      ${fb('pw')}${S.hints.pw?`<div class="hint">${HINTS.pw}</div>`:''}</div></div>`;
+  }
+  return `<h2>Stage 1 · Data Decoding</h2><p class="lede">Solve the four locks in any order. Write your steps in your Logbook.</p>
+  ${lockShell('l1','Lock 1 · Quantity Check',b1,c1,!c1.includes('_'))}
+  ${lockShell('l2','Lock 2 · Compliance Check',b2,c2,S.l2.length>0)}
+  ${lockShell('l3','Lock 3 · Size Order',b3,S.l3.join('')||'_',S.l3.length===5)}
+  ${lockShell('l4','Lock 4 · Reality Check',b4,c4,!c4.includes('_'))}
+  ${pw}`;
+}
+
+function vStage2(){
+  const data=[[1,'120.0','120.1','119.9'],[2,'118.0','122.0','120.0'],[3,'117.0','117.1','116.9']];
+  const truth={1:[120,0.1],2:[120,2],3:[117,0.1]};
+  const cls=(t,i)=>{if(!S.l5checked)return'';const v=num(S.l5calc[t+'_'+i]);if(v===null)return'bad';return Math.abs(v-truth[t][i])<=0.051?'ok':'bad';};
+  const teams=data.map(r=>`<div class="team"><h4>Team ${r[0]}</h4><div class="trials">${r.slice(1).map(v=>`<span>${v} cm</span>`).join('')}</div>
+     <div class="fields"><div><label class="f" style="margin-top:0">Mean (cm)</label><input class="inp n ${cls(r[0],0)}" inputmode="decimal" data-bind="l5calc.${r[0]}_0" value="${esc(S.l5calc[r[0]+'_0'])}"></div>
+     <div><label class="f" style="margin-top:0">Δx (cm)</label><input class="inp n ${cls(r[0],1)}" inputmode="decimal" data-bind="l5calc.${r[0]}_1" value="${esc(S.l5calc[r[0]+'_1'])}"></div></div></div>`).join('');
+  const done=S.solved.l5;
+  const dig=[['a','Δx of Team 2 (in cm)'],['b','Difference between the mean of Team 3 and the true value (in cm)'],['c','Number of the team that is both precise and accurate'],['d','Error type of Team 3: 1 = random, 2 = systematic']];
+  return `<h2>Stage 2 · Data Forensics</h2><p class="lede">Three teams measured the length of the lab table. A laser later showed the true length: <b>120.0 cm</b>.</p>
+  <div class="lock ${anim.shake==='l5'?'shake':''}" id="lk-l5"><div class="lh"><h3>Lock 5 · Data Forensics</h3><span class="badge ${done?'ok':''}">${done?'Solved':'Locked'}</span></div><div class="lb">
+    <p>Calculate the mean and Δx = (largest − smallest) / 2 for each team.</p>
+    <div class="teams">${teams}</div>
+    <div class="codeline" style="border-top:none;margin-top:8px;padding-top:0"><button class="btn ghost small" data-a="l5check">Check my calculations</button></div>
+    <p style="margin-top:14px">Now find the four digits:</p>
+    ${dig.map(([k,t])=>`<div class="dig"><span>${k}) ${t}</span><input class="inp" inputmode="numeric" maxlength="1" data-bind="l5.${k}" value="${esc(S.l5[k])}" ${done?'disabled':''} aria-label="Digit ${k}"></div>`).join('')}
+    <div class="codeline">${done?`<span class="code">2312</span><button class="btn wide" data-a="go" data-v="stage3">Open the Sensor Lab</button>`:`<button class="btn" data-a="send" data-v="l5">Send code</button>${hintBtn('l5')}`}</div>
+    ${done?'':fb('l5')}${S.hints.l5&&!done?`<div class="hint">${HINTS.l5}</div>`:''}
+  </div></div>`;
+}
+
+/* ---------- virtual instruments ---------- */
+const sw={start:0,acc:0,run:false};
+const swTime=()=>(sw.acc+(sw.run?performance.now()-sw.start:0))/1000;
+function swUI(){return `<div class="sw"><button class="swbtn ${sw.run?'run':''}" id="swbtn" data-sw="toggle">${sw.run?'Stop':'Start'}</button>
+  <div><div class="swd" id="swd">${fmt(swTime(),2)} s</div><button class="btn ghost small" data-sw="reset" style="margin-top:6px">Reset stopwatch</button></div></div>`;}
+
+function rulerSVG(){
+  const R=S.ruler,h=R.n*R.t; // cm above table
+  // overview
+  const T=230,k=30;let o=`<svg viewBox="0 0 150 250" width="150" height="250" aria-label="Paper stack next to the ruler">`;
+  o+=`<rect x="0" y="${T}" width="150" height="20" class="svg-wood"/>`;
+  o+=`<rect x="14" y="${T-h*k}" width="64" height="${Math.max(h*k,1)}" class="svg-paper" stroke-width="1"/>`;
+  for(let i=1;i<Math.min(R.n,60);i+=Math.max(1,Math.floor(R.n/12)))o+=`<line x1="14" x2="78" y1="${T-i*R.t*k}" y2="${T-i*R.t*k}" class="svg-dash" stroke-width=".6"/>`;
+  o+=`<path d="M86 ${T} L88 ${T-3} L91 ${T} L94 ${T-3} L97 ${T} L100 ${T-3} L103 ${T} L106 ${T-3} L108 ${T} L108 20 L86 20 Z" class="svg-ruler" stroke-width="1"/>`;
+  for(let c=0;c<=7;c++){const y=T-c*k;if(y<22)break;o+=`<line x1="86" x2="97" y1="${y}" y2="${y}" class="svg-line" stroke-width="1.2"/><text x="112" y="${y+4}" font-size="11" class="svg-ink" font-family="sans-serif">${c+1}</text>`;}
+  const fy=R.view==='top'?T-h*k:T;o+=`<rect x="80" y="${fy-22}" width="62" height="44" fill="none" class="svg-line" stroke-width="1.5" stroke-dasharray="4 3" rx="4"/>`;
+  o+=`</svg>`;
+  // magnifier
+  const c0=R.view==='top'?h:0.4,K=110,cy=125,Y=v=>cy-(v-c0)*K;
+  let m=`<svg viewBox="0 0 180 250" width="180" height="250" aria-label="Magnifier on the ruler"><defs><clipPath id="mc"><rect x="0" y="0" width="180" height="250" rx="10"/></clipPath></defs><g clip-path="url(#mc)">`;
+  if(Y(0)<250)m+=`<rect x="0" y="${Y(0)}" width="180" height="${250-Y(0)}" class="svg-wood"/>`;
+  const top=Math.max(Y(h),-5);if(h>0)m+=`<rect x="0" y="${top}" width="88" height="${Math.min(Y(0),255)-top}" class="svg-paper" stroke-width="1"/>`;
+  for(let i=1;i<=R.n;i++){const yy=Y(i*R.t);if(yy>-2&&yy<252&&(R.n<=150||i%3===0))m+=`<line x1="0" x2="88" y1="${yy}" y2="${yy}" class="svg-dash" stroke-width=".7"/>`;}
+  const rb=Math.min(Y(0),250);m+=`<rect x="92" y="-5" width="60" height="${rb+5}" class="svg-ruler" stroke-width="1.2"/>`;
+  if(Y(0)<250){let p=`M92 ${Y(0)}`;for(let x=92;x<=152;x+=6)p+=` L${x+3} ${Y(0)-4} L${x+6} ${Y(0)}`;m+=`<path d="${p}" fill="var(--wood)" class="svg-line" stroke-width="1"/>`;}
+  const mm0=Math.max(0,Math.floor((c0-1.2)*10)),mm1=Math.ceil((c0+1.2)*10);
+  for(let q=mm0;q<=mm1;q++){const y=Y(q/10);const L=q%10===0?24:q%5===0?16:9;m+=`<line x1="92" x2="${92+L}" y1="${y}" y2="${y}" class="svg-line" stroke-width="${q%10===0?1.6:1}"/>`;
+    if(q%10===0)m+=`<text x="${92+28}" y="${y+6}" font-size="17" font-weight="700" class="svg-ink" font-family="sans-serif">${q/10+1}</text>`;}
+  m+=`</g><rect x="1" y="1" width="178" height="248" rx="10" fill="none" class="svg-line" stroke-width="2"/></svg>`;
+  return `<div class="inst" id="rulerbox"><div>${o}<div class="cap">Overview</div></div><div>${m}<div class="cap">Magnifier: ${R.view==='top'?'top of the stack':'bottom end of the ruler'}</div></div></div>`;
+}
+function scaleSVG(){
+  const C=S.scale,heap=Math.min(28,C.count*0.12);
+  let s=`<svg viewBox="0 0 260 150" width="260" height="150" aria-label="Scale">`;
+  s+=`<rect x="20" y="118" width="220" height="24" rx="6" class="svg-ink"/><rect x="40" y="108" width="180" height="10" rx="3" class="svg-muted"/>`;
+  if(C.cup){s+=`<path d="M92 108 L84 54 L176 54 L168 108 Z" fill="var(--surface)" class="svg-line" stroke-width="2"/>`;
+    if(C.count>0)s+=`<path d="M${96-heap/6} 104 Q130 ${100-heap*1.6} ${164+heap/6} 104 Z" fill="#F4EFDF" stroke="var(--muted)" stroke-width="1"/>`;}
+  s+=`</svg>`;
+  const g=(C.cup?5.00+C.grains:0)-C.tare;
+  return `<div class="inst"><div>${s}</div><div><div class="lcd" aria-live="polite">${fmt(g,2)} g</div><div class="cap">${C.cup?(C.count?C.count+' grains in the cup':'cup is empty'):'cup lifted off'}</div></div></div>`;
+}
+function pendSVG(){return `<div class="inst"><svg viewBox="0 0 300 250" width="300" height="250" aria-label="Pendulum, 1.00 m long">
+  <rect x="90" y="8" width="120" height="8" class="svg-ink"/><g id="pend"><line x1="150" y1="16" x2="150" y2="206" class="svg-line" stroke-width="1.5"/><circle cx="150" cy="214" r="12" class="svg-bob"/></g>
+  <line x1="150" y1="16" x2="150" y2="240" class="svg-dash" stroke-dasharray="3 4"/></svg></div>`;}
+function walkSVG(){const X=x=>14+x*40;return `<div class="inst"><svg viewBox="0 0 310 120" width="310" height="120" aria-label="5 m walking track">
+  <rect x="0" y="86" width="310" height="10" class="svg-muted" opacity=".35"/>
+  <line x1="${X(1)}" x2="${X(1)}" y1="40" y2="100" class="svg-ok" stroke-width="3"/><text x="${X(1)}" y="114" text-anchor="middle" font-size="11" class="svg-ink" font-family="sans-serif">start</text>
+  <line x1="${X(6)}" x2="${X(6)}" y1="40" y2="100" class="svg-bad" stroke-width="3"/><text x="${X(6)}" y="114" text-anchor="middle" font-size="11" class="svg-ink" font-family="sans-serif">finish</text>
+  <text x="${X(3.5)}" y="34" text-anchor="middle" font-size="12" class="svg-muted" font-family="sans-serif">5.00 m</text>
+  <g id="walker" transform="translate(${X(walk.x)},0)"><circle cx="0" cy="52" r="7" class="svg-ink"/><line x1="0" y1="59" x2="0" y2="74" class="svg-line" stroke-width="3"/><line x1="0" y1="74" x2="-6" y2="86" class="svg-line" stroke-width="3" id="lg1"/><line x1="0" y1="74" x2="6" y2="86" class="svg-line" stroke-width="3" id="lg2"/></g></svg></div>`;}
+const walk={x:0,start:0,v:1.4,run:false};
+let swingCount=0;
+const T0=performance.now();
+
+function labPanel(n){
+  if(n==1)return `<div class="lab"><h4>Virtual instrument: ruler and paper</h4>${rulerSVG()}
+    <label class="f">Sheets in the stack: <span id="nlab">${S.ruler.n}</span></label>
+    <input type="range" class="range" min="1" max="500" step="1" value="${S.ruler.n}" data-r="n" aria-label="Number of sheets">
+    <div class="ctrls"><button class="btn small" data-a="restack">Build a new stack</button>
+    <button class="btn ghost small" data-a="rview" data-v="${S.ruler.view==='top'?'bottom':'top'}">${S.ruler.view==='top'?'Look at the bottom of the ruler':'Look at the top of the stack'}</button></div>
+    <p class="muted" style="font-size:.88rem;margin-top:10px">Read the ruler where the top of the stack is. Every new stack is a new trial.</p></div>`;
+  if(n==2)return `<div class="lab"><h4>Virtual instrument: pendulum and stopwatch</h4>${pendSVG()}${swUI()}
+    <div class="ctrls"><button class="btn ghost small" data-a="count">Count a swing: <b id="cnt">${swingCount}</b></button><button class="btn ghost small" data-a="countreset">Reset count</button></div>
+    <p class="muted" style="font-size:.88rem;margin-top:10px">Start when the bob is at one end, count full swings (there and back = 1), stop at the same end.</p></div>`;
+  if(n==3){const C=S.scale;return `<div class="lab"><h4>Virtual instrument: scale and cup</h4>${scaleSVG()}
+    <div class="ctrls"><button class="btn small" data-a="pour" ${C.cup?'':'disabled'}>Pour in 100 grains</button><button class="btn ghost small" data-a="empty" ${C.count?'':'disabled'}>Empty the cup</button>
+    <button class="btn ghost small" data-a="cup">${C.cup?'Lift the cup off':'Put the cup back'}</button><button class="btn ghost small" data-a="tare">Tare (set to 0)</button></div>
+    <p class="muted" style="font-size:.88rem;margin-top:10px">Each portion of 100 grains is a new trial.</p></div>`;}
+  if(n==4)return `<div class="lab"><h4>Virtual instrument: track and stopwatch</h4>${walkSVG()}
+    <div class="ctrls"><button class="btn small" data-a="walk">Let the walker go</button></div>${swUI()}
+    <p class="muted" style="font-size:.88rem;margin-top:10px">Start the stopwatch when the walker crosses the start line, stop at the finish line.</p></div>`;
+}
+
+function vStage3(){
+  const letters=[1,2,3,4].map(n=>S.sensor[n].letter);
+  const grid=[1,2,3,4].map(n=>`<button class="stbtn ${S.st==n?'on':''}" data-a="st" data-v="${n}"><span class="muted" style="font-size:.85rem">Station ${n}</span><br><b>${ST[n].title}</b><span class="L ${letters[n-1]?'':'empty'}">${letters[n-1]||'?'}</span></button>`).join('');
+  const n=S.st,d=ST[n],s=S.sensor[n],dis=s.letter?'disabled':'';
+  const dec=`<table class="decoder"><tr><th>Mean value</th><th>Letter</th></tr>${d.dec.map(x=>`<tr><td>${x[2]}</td><td><b>${x[1]}</b></td></tr>`).join('')}</table>`;
+  const station=`<div class="lock" id="station"><div class="lh"><h3>Station ${n} · ${d.title} sensor</h3>${s.letter?`<span class="badge ok">Letter ${s.letter}</span>`:''}</div><div class="lb">
+    <p>${d.task}</p>
+    ${d.warn?'<div class="warn">Warning: one of your instruments may be faulty. Check it first!</div>':''}
+    <div class="seg"><button data-a="mode" data-v="virtual" class="${s.mode==='virtual'?'on':''}">Virtual lab</button><button data-a="mode" data-v="real" class="${s.mode==='real'?'on':''}">Real station</button></div>
+    ${s.mode==='virtual'?labPanel(n):'<p class="muted">Use the real instruments at the station ('+d.eq+') and write your raw data below.</p>'}
+    <label class="f">1 · Estimate before you measure (${d.unit})</label><input class="inp n" inputmode="decimal" data-bind="sensor.${n}.est" value="${esc(s.est)}" ${dis}>
+    <label class="f">2 · Raw data and conversions</label><textarea class="inp" data-bind="sensor.${n}.raw" placeholder="${n==1?'e.g. 100 sheets = ___ mm':n==2?'e.g. 10 swings = ___ s':n==3?'e.g. 100 grains = ___ g':'e.g. 5.00 m in ___ s'}" ${dis}>${esc(s.raw)}</textarea>
+    <label class="f">3 · ${d.q} in ${d.unit}</label>
+    <div class="fields">${[0,1,2].map(i=>`<div><span class="muted" style="font-size:.8rem">Trial ${i+1}</span><input class="inp n" inputmode="decimal" aria-label="Trial ${i+1}" data-bind="sensor.${n}.t.${i}" value="${esc(s.t[i])}" ${dis}></div>`).join('')}</div>
+    <label class="f">4 · Mean and uncertainty</label>
+    <div class="fields"><div><span class="muted" style="font-size:.8rem">Mean (${d.unit})</span><input class="inp n" inputmode="decimal" data-bind="sensor.${n}.mean" value="${esc(s.mean)}" ${dis}></div>
+      <div><span class="muted" style="font-size:.8rem">Δx (${d.unit})</span><input class="inp n" inputmode="decimal" data-bind="sensor.${n}.dx" value="${esc(s.dx)}" ${dis}></div></div>
+    <label class="f">5 · Decoder</label>${dec}
+    <div class="codeline">${s.letter?`<span>Result: <b>${esc(s.res)}</b> → <b>${s.letter}</b></span><button class="btn ghost small" data-a="redo" data-v="${n}">Redo this station</button>`:`<button class="btn wide" data-a="calc" data-v="${n}">Check calculation and get the letter</button>`}</div>
+    ${s.msg?`<div class="fb bad">${s.msg}</div>`:''}
+  </div></div>`;
+  const allL=letters.every(Boolean);
+  const word=`<div class="lock ${anim.shake==='lab'?'shake':''}" id="lk-lab"><div class="lh"><h3>Final word</h3>${S.solved.lab?'<span class="badge ok">Vault open</span>':''}</div><div class="lb">
+    <p>Station order 1, 2, 3, 4:</p><div class="finalword">${letters.map(l=>`<span>${l||''}</span>`).join('')}</div>
+    <div class="codeline">${S.solved.lab?`<button class="btn wide" data-a="go" data-v="vault">Open the Vault</button>`:`<button class="btn" data-a="send" data-v="lab" ${allL?'':'disabled'}>Send word</button>`}</div>
+    ${S.solved.lab?'':`<div class="ctrls">${['lab1','lab2','lab3'].map((k,i)=>S.hints[k]?'':`<button class="btn ghost small" data-a="hint" data-v="${k}" ${S.tokens<1?'disabled':''}>Hint: ${['too small or too fast','instrument','final word'][i]}</button>`).join('')}</div>`}
+    ${S.solved.lab?'':fb('lab')}${['lab1','lab2','lab3'].map(k=>S.hints[k]&&!S.solved.lab?`<div class="hint">${HINTS[k]}</div>`:'').join('')}
+  </div></div>`;
+  return `<h2>Stage 3 · Sensor Lab</h2><p class="lede">Visit the stations in any order. Estimate, measure three times, calculate mean and Δx, then decode your letter.</p>
+  <div class="stgrid">${grid}</div>${station}${word}`;
+}
+
+function vVault(){
+  const fds=[1,2,3,4].map(n=>{const s=S.sensor[n],f=S.final[n]||{};return `<div class="fds"><b>${n} · ${ST[n].q}</b><br><span>${esc(s.res||'')}</span>
+    <div class="fields" style="margin-top:6px"><div style="flex:1 1 200px"><input class="inp" data-bind="final.${n}.src" value="${esc(f.src||'')}" placeholder="One possible source of error"></div>
+    <div><select class="inp" data-bind="final.${n}.type"><option value="">random or systematic?</option><option ${f.type==='random'?'selected':''}>random</option><option ${f.type==='systematic'?'selected':''}>systematic</option></select></div></div></div>`;}).join('');
+  const ex=[['1','\u201cThe rod is 12 long.\u201d What is missing?','The unit is missing, e.g. 12 m.'],
+    ['2','2 mm = ______ m','0.002 m'],
+    ['3','What does (2.34 ± 0.05) s tell us?','The best value is 2.34 s, the uncertainty is ±0.05 s, the true value probably lies between 2.29 s and 2.39 s.'],
+    ['4','Give one example of a systematic error.','e.g. a ruler missing its start, an untared scale, a stopwatch running fast or slow.'],
+    ['5','One sentence: What can we learn from the Mars Orbiter?','Always state and check your units; everyone involved needs to use the same units.']];
+  const exit=ex.map(([k,q,a])=>{let mark='';if(S.exitShow&&k==='2'){const v=num(S.exit[2]);mark=v!==null&&Math.abs(v-0.002)<1e-9?' <span class="badge ok">correct</span>':' <span class="badge">check again</span>';}
+    return `<div class="q"><span><b>${k})</b> ${q}${mark}</span><input class="inp" data-bind="exit.${k}" value="${esc(S.exit[k]||'')}" ${k==='2'?'inputmode="decimal"':''}>${S.exitShow?`<p class="muted" style="margin:6px 0 0">Model answer: ${a}</p>`:''}</div>`;}).join('');
+  return `<div class="cert ${anim.reveal==='lab'?'reveal':''}"><span class="muted">Mission complete</span><h2>The Vault is open</h2>
+    <p>Mars Orbiter II is calibrated and back on course. The engineers of Team ${esc(S.team||'____')} have proven that they</p>
+    <div class="big">ALWAYS CHECK THEIR UNITS</div><p>Engineers: ${esc(S.names||'________________')}</p></div>
+  <div class="lock"><div class="lh"><h3>Final Data Sheet</h3></div><div class="lb">${fds}
+    <div class="codeline noprint"><button class="btn ghost" data-a="print">Print</button><button class="btn ghost" data-a="go" data-v="bonus">Bonus Missions</button></div>
+  </div></div>
+  <div class="lock noprint"><div class="lh"><h3>Exit Ticket</h3></div><div class="lb">
+    <p>Answer 3 of the 5 questions.</p>${exit}
+    <div class="codeline"><button class="btn" data-a="exitshow">${S.exitShow?'Hide':'Show'} model answers</button></div>
+  </div></div>`;
+}
+
+function vBonus(){
+  return `<h2>Bonus Missions</h2><p class="lede">For teams that have reached the Vault and still have time.</p>
+  <div class="lock ${anim.shake==='b1'?'shake':''}" id="lk-b1"><div class="lh"><h3>Bonus 1 · Speed Lock</h3>${S.solved.b1?'<span class="badge ok">Solved</span>':''}</div><div class="lb">
+    <p>A test car drives at 108 km/h. Convert this speed to m/s. You know how to convert km to m (File 3), and 1 h = 3600 s.</p>
+    <div class="fields"><input class="inp n" inputmode="numeric" data-bind="b1" value="${esc(S.b1)}"><span style="padding-bottom:10px">m/s</span></div>
+    <div class="codeline"><button class="btn" data-a="send" data-v="b1" ${S.solved.b1?'disabled':''}>Send code</button></div>${fb('b1')}</div></div>
+  <div class="lock"><div class="lh"><h3>Bonus 2 · Invent-a-Unit</h3></div><div class="lb">
+    <p>Invent a unit for something nobody measures yet, for example how full a backpack is or boredom in class. Define it precisely with a reference, give it a symbol and explain how you would convert it into an SI unit. Present your idea to Mission Control.</p>
+    <textarea class="inp" data-bind="b2">${esc(S.b2)}</textarea></div></div>
+  <div class="lock"><div class="lh"><h3>Bonus 3 · Lock Designer</h3></div><div class="lb">
+    <p>Design your own Lock 7 for another team. It must be solvable using File 3 (prefixes). Write the puzzle, the code and one hint. Give it to Mission Control to check.</p>
+    <textarea class="inp" data-bind="b3">${esc(S.b3)}</textarea></div></div>`;
+}
+
+/* ---------- drawers & modal ---------- */
+function handbook(){
+  const si=[['length','metre','m'],['mass','kilogram','kg'],['time','second','s'],['electric current','ampere','A'],['temperature','kelvin','K'],['amount of substance','mole','mol'],['luminous intensity','candela','cd']];
+  const px=[['giga','G','10⁹','1 000 000 000'],['mega','M','10⁶','1 000 000'],['kilo','k','10³','1 000'],['centi','c','10⁻²','0.01'],['milli','m','10⁻³','0.001'],['micro','µ','10⁻⁶','0.000 001'],['nano','n','10⁻⁹','0.000 000 001']];
+  const voc=[['to measure','messen'],['physical quantity','physikalische Größe'],['numerical value','Zahlenwert'],['unit','Einheit'],['base unit','Basiseinheit'],['symbol','Zeichen, Symbol'],['prefix','Vorsilbe'],['factor','Faktor'],['thickness','Dicke'],['grain','Korn'],['swing','Schwingung'],['period','Schwingungsdauer'],['mean','Mittelwert'],['uncertainty','Unsicherheit'],['spread','Streuung'],['largest / smallest','größter / kleinster'],['random','zufällig'],['systematic','systematisch'],['precise','präzise (eng beieinander)'],['accurate','genau (nahe am wahren Wert)'],['instrument','Messgerät'],['true value','wahrer Wert'],['trial','Messdurchgang'],['to estimate','schätzen']];
+  return `<div class="filetabs"><a href="#f1">File 1</a><a href="#f2">File 2</a><a href="#f3">File 3</a><a href="#f4">File 4</a><a href="#fv">Vocabulary</a></div>
+  <div class="file" id="f1"><h3>File 1 · What is a physical quantity?</h3>
+  <p>Physics describes nature with numbers. A property that we can measure is called a <b>physical quantity</b>. Examples are length, mass, time and temperature. Things like beauty or luck cannot be measured, so they are not physical quantities.</p>
+  <p>A measurement always has two parts: a <b>numerical value</b> and a <b>unit</b>. The unit tells us what we compared with.</p>
+  <p class="formula">Physical quantity = numerical value × unit</p>
+  <p>Example: l = 2.5 m → quantity: length (symbol l) · numerical value: 2.5 · unit: metre (m).</p>
+  <p>A number without a unit is useless: \u201c2.5\u201d could mean metres, centimetres or miles!</p></div>
+  <div class="file" id="f2"><h3>File 2 · The SI system</h3>
+  <p>In the past, everybody used their own units: hand spans, feet, steps. This caused chaos. Today scientists all over the world use the <b>International System of Units (SI)</b>. It has seven base units:</p>
+  <div class="tbl"><table><tr><th>Quantity</th><th>Unit</th><th>Symbol</th></tr>${si.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td><b>${r[2]}</b></td></tr>`).join('')}</table></div>
+  <p>Every unit has an internationally fixed symbol. Do not invent your own abbreviations. All other units (for example the unit of speed) are combinations of these seven.</p></div>
+  <div class="file" id="f3"><h3>File 3 · Prefixes</h3>
+  <p>Writing 0.000001 m or 1 000 000 000 Hz is annoying. So we put a <b>prefix</b> in front of the unit. It stands for a factor.</p>
+  <div class="tbl"><table><tr><th>Prefix</th><th>Symbol</th><th>Factor</th><th>Number</th></tr>${px.map(r=>`<tr><td>${r[0]}</td><td><b>${r[1]}</b></td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join('')}</table></div>
+  <p>Examples: 3 km = 3 × 1000 m = 3000 m · 5 mm = 5 × 0.001 m = 0.005 m</p>
+  <p>Fun fact: the kilogram is the only base unit that already contains a prefix. 1 g = 0.001 kg.</p></div>
+  <div class="file" id="f4"><h3>File 4 · How good is a measurement?</h3>
+  <p>No measurement is perfectly exact. If you measure the same length three times, you will usually get slightly different values. A good result therefore has two parts: a <b>best value</b> and an <b>uncertainty</b>.</p>
+  <p>The best value is the <b>mean</b>: add all values and divide by their number. A simple estimate for the uncertainty is half of the spread:</p>
+  <p class="formula">Δx = (largest value − smallest value) / 2</p>
+  <p>We write the result as <b>x ± Δx</b> with a unit.</p>
+  <p>Example: 12.1 cm, 12.3 cm, 12.5 cm → mean = 12.3 cm, Δx = (12.5 − 12.1) / 2 = 0.2 cm → result: l = (12.3 ± 0.2) cm.</p>
+  <p><b>Random errors</b> change from one measurement to the next, for example your reaction time when you press a stopwatch. Repeating the measurement and taking the mean makes them smaller.</p>
+  <p><b>Systematic errors</b> push all results in the same direction, for example a ruler whose first centimetre is missing. Repeating does not help. You have to find and fix the cause.</p>
+  <p>A measurement is <b>precise</b> if repeated values lie close together, and <b>accurate</b> if they are close to the true value. Always check your instrument before you measure!</p></div>
+  <div class="file" id="fv"><h3>Vocabulary (English – German)</h3>
+  <div class="tbl"><table>${voc.map(r=>`<tr><td>${r[0]}</td><td class="muted">${r[1]}</td></tr>`).join('')}</table></div></div>`;
+}
+function logbook(){
+  const secs=[['read','Reading notes','3 new words I learned. One question I still have.'],['l1','Lock 1 Quantity Check',''],['l2','Lock 2 Compliance Check',''],['l3','Lock 3 Size Order',''],['l4','Lock 4 Reality Check',''],['l5','Lock 5 Data Forensics',''],['lab','Sensor Lab: errors I noticed','']];
+  return `<p class="muted">Write your steps and calculations here. Always include units! Anyone in your team may have to explain a step.</p>`+
+    secs.map(([k,t,p])=>`<label class="f">${t}</label><textarea class="inp" data-bind="log.${k}" placeholder="${p}">${esc(S.log[k]||'')}</textarea>`).join('');
+}
+function renderOverlay(){
+  let h='';
+  if(S.drawer){h+=`<div class="scrim desk-scrim" data-a="close" style="z-index:44"></div><aside class="drawer" role="dialog" aria-label="${S.drawer==='handbook'?'Mission Handbook':'Logbook'}"><div class="dh"><h2>${S.drawer==='handbook'?'Mission Handbook':'Logbook'}</h2><button class="tb" data-a="close">Close</button></div><div class="db" id="drawerbody">${S.drawer==='handbook'?handbook():logbook()}</div></aside>`;}
+  if(S.rep){const r=REP[S.rep.lock];
+    h+=`<div class="scrim sheet"><div class="modal" role="dialog" aria-label="Random Reporter">
+      <div class="die ${anim.roll?'roll':''}">${S.rep.role+1}</div>
+      <h3>Code accepted! Random Reporter: ${ROLES[S.rep.role]}</h3>
+      <p class="muted">Hand the phone to the ${ROLES[S.rep.role]}. They answer alone.</p>
+      <p><b>${r.q}</b></p>
+      ${S.rep.wrong?'<div class="fb bad">Not convincing. Explain it to your teammate and try again.</div>':''}
+      ${S.rep.order.map(i=>`<button class="opt" data-a="rep" data-v="${i}">${i===0?r.ok:r.no[i-1]}</button>`).join('')}
+    </div></div>`;}
+  const ov=document.getElementById('overlay');
+  const keepScroll=document.getElementById('drawerbody');const st=keepScroll?keepScroll.scrollTop:0;
+  ov.innerHTML=h;
+  const db=document.getElementById('drawerbody');if(db&&st)db.scrollTop=st;
+  document.body.style.overflow=(S.drawer||S.rep)?'hidden':'';
+}
+
+function render(){
+  const v={intro:vIntro,stage1:vStage1,stage2:vStage2,stage3:vStage3,vault:vVault,bonus:vBonus}[unlocked(S.view)?S.view:'intro'];
+  document.getElementById('main').innerHTML=v();
+  renderTraj();renderNav();renderOverlay();save();anim={};
+}
+
+/* ---------- logic ---------- */
+function setPath(p,val){const k=p.split('.');let o=S;for(let i=0;i<k.length-1;i++){if(o[k[i]]==null)o[k[i]]={};o=o[k[i]];}o[k[k.length-1]]=val;}
+function codeOf(id){
+  if(id==='l1')return['a','b','c','d','e'].map(k=>S.l1[k]||'').join('');
+  if(id==='l2')return S.l2.slice().sort().join('');
+  if(id==='l3')return S.l3.join('');
+  if(id==='l4')return[0,1,2,3].map(i=>S.l4[i]||'').join('');
+  if(id==='pw')return S.pw.toUpperCase().replace(/[^A-Z ]/g,'').replace(/\s+/g,' ').trim();
+  if(id==='l5')return['a','b','c','d'].map(k=>String(S.l5[k]).trim()).join('');
+  if(id==='lab')return[1,2,3,4].map(n=>S.sensor[n].letter||'').join('');
+  if(id==='b1')return String(S.b1).trim();
+}
+function send(id){
+  if(codeOf(id)===CODES[id]){
+    S.fb[id]=null;buzz([30,40,30]);
+    if(REP[id]){S.rep={lock:id,role:Math.floor(Math.random()*4),order:[0,1,2].sort(()=>Math.random()-.5),wrong:false};anim.roll=true;}
+    else{S.solved[id]=true;S.fb[id]={t:'ok',m:'Correct! 108 km/h = 108 × 1000 m / 3600 s = 30 m/s.'};}
+  }else{
+    buzz(160);anim.shake=id;
+    S.fb[id]={t:'bad',m:id==='lab'?'Sensor calibration failed. One instrument or one measurement is off. Check again.':'Access denied. Check again.'};
+  }
+  render();
+}
+function repAnswer(i){
+  if(i===0){const id=S.rep.lock;S.solved[id]=true;S.rep=null;anim.reveal=id;buzz([20,30,20,30,60]);
+    if(id==='lab')S.view='vault';
+    render();
+    if(id==='lab')window.scrollTo(0,0);else{const el=document.getElementById('lk-'+id);if(el)el.scrollIntoView({block:'center'});}
+    toast(WORDS[id]?'Word card: '+WORDS[id]:id==='pw'?'Stage 2 unlocked':id==='l5'?'Sensor Lab unlocked':'Vault open!');
+  }else{buzz(160);S.rep.wrong=true;S.rep.order=[0,1,2].sort(()=>Math.random()-.5);render();}
+}
+function calc(n){
+  const s=S.sensor[n],d=ST[n];const t=s.t.map(num);
+  if(num(s.est)===null){s.msg='Write your estimate first. Estimate before you measure!';return render();}
+  if(t.some(v=>v===null)){s.msg='Enter all three converted trial values (in '+d.unit+').';return render();}
+  const m=num(s.mean),dx=num(s.dx);const M=(t[0]+t[1]+t[2])/3,DX=(Math.max(...t)-Math.min(...t))/2;
+  if(m===null||Math.abs(m-M)>Math.max(Math.abs(M)*0.02,d.tol)){s.msg='Your mean does not match your three trials. Add all three values and divide by 3.';buzz(160);return render();}
+  if(dx===null||Math.abs(dx-DX)>Math.max(DX*0.05,d.tol)){s.msg='Your Δx does not match your trials. Δx = (largest − smallest) / 2.';buzz(160);return render();}
+  s.msg='';s.letter=decode(n,m);s.res=`(${String(s.mean).replace(',','.')} ± ${String(s.dx).replace(',','.')}) ${d.unit}`;
+  S.fb.lab=null;buzz(30);render();toast('Station '+n+': letter '+s.letter);
+}
+function refreshLab(){const b=document.querySelector('.lab');if(!b)return;b.outerHTML=labPanel(S.st);save();}
+
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a,v=b.dataset.v;
+  switch(a){
+    case'go':if(unlocked(v)){S.view=v;S.drawer=null;render();window.scrollTo(0,0);}break;
+    case'start':S.start=Date.now();S.view='stage1';render();window.scrollTo(0,0);break;
+    case'drawer':S.drawer=v;render();break;
+    case'close':S.drawer=null;render();break;
+    case'l1':S.l1[b.dataset.k]=+v;S.fb.l1=null;render();break;
+    case'l2':{const i=+v;S.l2=S.l2.includes(i)?S.l2.filter(x=>x!==i):S.l2.concat(i);S.fb.l2=null;render();break;}
+    case'l3':if(!S.l3.includes(+v)&&S.l3.length<5){S.l3.push(+v);S.fb.l3=null;render();}break;
+    case'l3rm':S.l3.splice(+v,1);S.fb.l3=null;render();break;
+    case'l4':S.l4[b.dataset.k]=v;S.fb.l4=null;render();break;
+    case'send':send(v);break;
+    case'hint':if(S.tokens>0&&!S.hints[v]){S.tokens--;S.hints[v]=true;render();}break;
+    case'rep':repAnswer(+v);break;
+    case'l5check':S.l5checked=true;render();break;
+    case'st':S.st=+v;sw.run=false;sw.acc=0;render();document.getElementById('station').scrollIntoView({block:'start'});break;
+    case'mode':S.sensor[S.st].mode=v;render();break;
+    case'restack':S.ruler.t=rnd(0.0096,0.0104);refreshLab();break;
+    case'rview':S.ruler.view=v;refreshLab();break;
+    case'count':swingCount++;document.getElementById('cnt').textContent=swingCount;buzz(10);break;
+    case'countreset':swingCount=0;document.getElementById('cnt').textContent=0;break;
+    case'pour':S.scale.grains+=100*rnd(0.0236,0.0264);S.scale.count+=100;refreshLab();break;
+    case'empty':S.scale.grains=0;S.scale.count=0;refreshLab();break;
+    case'cup':S.scale.cup=!S.scale.cup;if(!S.scale.cup){S.scale.grains=0;S.scale.count=0;}refreshLab();break;
+    case'tare':S.scale.tare=(S.scale.cup?5.00+S.scale.grains:0);refreshLab();break;
+    case'walk':walk.x=0;walk.v=rnd(1.28,1.48);walk.start=performance.now();walk.run=true;break;
+    case'calc':calc(+v);break;
+    case'redo':{const s=S.sensor[v];s.letter=null;s.res='';s.msg='';s.t=['','',''];s.mean='';s.dx='';render();break;}
+    case'print':window.print();break;
+    case'exitshow':S.exitShow=!S.exitShow;render();break;
+    case'reset':if(confirm('Reset the whole mission? All progress on this device will be deleted.')){S=def();render();window.scrollTo(0,0);}break;
+  }
+});
+// stopwatch on pointerdown for fast, fair reaction times
+document.addEventListener('pointerdown',e=>{
+  const b=e.target.closest('[data-sw]');if(!b)return;e.preventDefault();
+  if(b.dataset.sw==='toggle'){if(sw.run){sw.acc+=performance.now()-sw.start;sw.run=false;}else{sw.start=performance.now();sw.run=true;}
+    const btn=document.getElementById('swbtn');btn.textContent=sw.run?'Stop':'Start';btn.classList.toggle('run',sw.run);buzz(15);}
+  else{sw.run=false;sw.acc=0;const btn=document.getElementById('swbtn');if(btn){btn.textContent='Start';btn.classList.remove('run');}}
+});
+document.addEventListener('keydown',e=>{
+  const b=e.target.closest&&e.target.closest('[data-sw]');if(b&&(e.key===' '||e.key==='Enter')){e.preventDefault();b.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true}));return;}
+  if(e.key==='Escape'&&S.drawer){S.drawer=null;render();}
+  if(e.key==='Enter'&&e.target.dataset&&e.target.dataset.bind==='pw'){e.preventDefault();send('pw');}
+});
+document.addEventListener('input',e=>{
+  const el=e.target;
+  if(el.dataset&&el.dataset.r==='n'){S.ruler.n=+el.value;document.getElementById('nlab').textContent=el.value;document.getElementById('rulerbox').outerHTML=rulerSVG();save();return;}
+  onBind(e);
+});
+document.addEventListener('change',onBind);
+function onBind(e){const el=e.target;if(!el.dataset||!el.dataset.bind)return;setPath(el.dataset.bind,el.value);
+  if(el.dataset.bind==='pw')S.fb.pw=null;if(el.dataset.bind.startsWith('l5.'))S.fb.l5=null;
+  if(el.dataset.bind==='team')document.getElementById('teamline').textContent=el.value?('Team '+el.value):'Measurements and SI Units';
+  save();}
+
+/* animation loop: pendulum, walker, stopwatch display */
+function loop(now){
+  const p=document.getElementById('pend');
+  if(p){const th=11*Math.cos(2*Math.PI*((now-T0)/1000)/2.006);p.setAttribute('transform',`rotate(${th.toFixed(2)} 150 16)`);}
+  const w=document.getElementById('walker');
+  if(w){if(walk.run){walk.x=Math.min(7.2,(now-walk.start)/1000*walk.v);if(walk.x>=7.2)walk.run=false;}
+    w.setAttribute('transform',`translate(${14+walk.x*40},0)`);
+    const ph=walk.run?Math.sin((now-walk.start)/1000*walk.v*Math.PI*1.4)*6:6;
+    const a=document.getElementById('lg1'),b=document.getElementById('lg2');if(a){a.setAttribute('x2',-ph);b.setAttribute('x2',ph);}}
+  const d=document.getElementById('swd');if(d)d.textContent=fmt(swTime(),2)+' s';
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+function tick(){const c=document.getElementById('clock');if(!S.start){c.textContent=MISSION_MIN+':00';c.classList.remove('low');return;}
+  let r=Math.max(0,MISSION_MIN*60-Math.floor((Date.now()-S.start)/1000));c.textContent=String(Math.floor(r/60)).padStart(2,'0')+':'+String(r%60).padStart(2,'0');c.classList.toggle('low',r<600);}
+setInterval(tick,1000);tick();render();
+})();
+</script>
+</body>
+</html>
